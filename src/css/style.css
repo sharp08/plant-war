@@ -1,0 +1,33 @@
+html,
+body {
+    height: 100%;
+    width: 100%;
+    background: #000000;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+#box {
+    text-align: center;
+    margin-top: 20px;
+}
+
+canvas {}
+
+.startBtn {
+    color: #999;
+    background: #fff;
+    opacity: 0;
+    border: 2px solid #e2e2e2;
+    font-size: 30px;
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 3px 10px;
+    position: absolute;
+    top: 400px;
+    left: 50%;
+    transform: translate(-50%);
+    transition: 0.2s all ease;
+}
