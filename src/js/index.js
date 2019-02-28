@@ -35,7 +35,7 @@ class Fight {
 			this.bullet.bullets = []
 
 			this.me = res[4]
-			
+
 			this.me.posX = 200
 			this.me.posY = 500
 
@@ -120,14 +120,9 @@ class Fight {
 					} else {
 						this.me.posY = 550
 					}
-
-
-
-					x = e.pageX - cvs.offsetLeft - 4;
-					y = e.pageY - cvs.offsetTop - 25 - 18
 				}, false)
 				setInterval(() => {
-					this.createBullets(x, y)
+					this.createBullets(this.me.posX + 25 - 4, this.me.posY - 18)
 				}, 1000)
 			}
 		}
