@@ -9,12 +9,13 @@ const startBtn = document.querySelector(".startBtn")
 const cvs = document.querySelector("canvas")
 const ctx = cvs.getContext("2d")
 
-let _self;
 
 //	产生 [m,n) 范围的随机数 
 const random = (m, n) => {
 	return Math.random() * (n - m) + m
 }
+
+let _self;
 
 //	搞起
 class Fight {
@@ -35,7 +36,7 @@ class Fight {
 			//	画布大小
 			this._width = 400
 			this._height = 600
-			//	加载
+			//	加载背景及文字
 			this.bg = res[0]
 			this.bg.speed = 2;
 			this.loading = res[1]
@@ -68,69 +69,67 @@ class Fight {
 			this.enemies = []
 			//  开始游戏开关
 			this.start = false;
-
-			requestAnimationFrame(loop)
-			function loop() {
-				ctx.clearRect(0, 0, _self._width, _self._height)
-				_self.drawBg()
-				//  游戏没开始，画加载背景
-				if (_self.start === false) {
-					_self.loadingFn()
+			//	循环绘画
+			requestAnimationFrame(this.loop)
+		})
+	}
+	loop() {
+		ctx.clearRect(0, 0, _self._width, _self._height)
+		_self.drawBg()
+		//  游戏没开始，画加载背景
+		if (_self.start === false) {
+			_self.loadingFn()
+		} else {
+			//  游戏开始，朕登场(参数说明)
+			//  1、寡人,
+			//	2~5、图片x轴起始位置,图片y轴起始位置,图片宽度,图片高度,
+			//	6~9、画在画布上的x轴位置,画在画布上的y轴位置,画出来的宽度,画出来的高度
+			ctx.drawImage(_self.me, 0, 0, _self.me._width, _self.me._height, _self.me.posX, _self.me.posY, _self.me.real_w, _self.me.real_y)
+			//  循环发射子弹
+			for (let i = 0; i < _self.bullet.bullets.length; i++) {
+				const blt = _self.bullet.bullets[i]
+				blt.y -= _self.bullet.speed;
+				if (blt.y <= 0) {
+					_self.bullet.bullets.splice(i, 1)
+					i--
 				} else {
-					//  游戏开始，朕登场(参数说明)
-					//  1、寡人,
-					//	2~5、图片x轴起始位置,图片y轴起始位置,图片宽度,图片高度,
-					//	6~9、画在画布上的x轴位置,画在画布上的y轴位置,画出来的宽度,画出来的高度
-					ctx.drawImage(_self.me, 0, 0, _self.me._width, _self.me._height, _self.me.posX, _self.me.posY, _self.me.real_w, _self.me.real_y)
-					//  循环发射子弹
-					for (let i = 0; i < _self.bullet.bullets.length; i++) {
-						const blt = _self.bullet.bullets[i]
-						blt.y -= _self.bullet.speed;
-						if (blt.y <= 0) {
+					ctx.drawImage(blt.src, blt.x, blt.y)
+				}
+			}
+			//	循环产生敌机
+			for (let i = 0; i < _self.enemies.length; i++) {
+				const plt = _self.enemies[i]
+				plt.y += _self.plain1.speed;
+				if (plt.y >= _self._height) {
+					_self.enemies.splice(i, 1)
+					i--
+				} else {
+					ctx.drawImage(plt.src, 0, 0, _self.plain1._width, _self.plain1._height, plt.x, plt.y, _self.plain1.real_w, _self.plain1.real_y)
+				}
+			}
+			let guard = true		//	防止执行过快
+			if (_self.start && guard) {
+				guard = false
+				for (let i = 0; i < _self.bullet.bullets.length; i++) {
+					for (let j = 0; j < _self.enemies.length; j++) {
+						const blt = _self.bullet.bullets[i];
+						const plt = _self.enemies[j];
+						const x_dis = blt.x - plt.x;
+						const y_dis = blt.y - plt.y;
+						//	如果【子单水平位置】在【敌机的左边界】和【右边界】之间，并且【垂直位置】在【敌机机头】和【机尾】之间
+						if ((x_dis >= 0 && x_dis <= _self.plain1._height) && (y_dis <= 0 && y_dis > -_self.plain1._height)) {
 							_self.bullet.bullets.splice(i, 1)
 							i--
-						} else {
-							ctx.drawImage(blt.src, blt.x, blt.y)
+							_self.enemies.splice(j, 1)
+							j--
+							break;
 						}
 					}
-					//	循环产生敌机
-					for (let i = 0; i < _self.enemies.length; i++) {
-						const plt = _self.enemies[i]
-						plt.y += _self.plain1.speed;
-						if (plt.y >= _self._height) {
-							_self.enemies.splice(i, 1)
-							i--
-						} else {
-							ctx.drawImage(plt.src, 0, 0, _self.plain1._width, _self.plain1._height, plt.x, plt.y, _self.plain1.real_w, _self.plain1.real_y)
-						}
-					}
-
-					let guard = true		//	防止执行过快
-					if (_self.start && guard) {
-						guard = false
-						for (let i = 0; i < _self.bullet.bullets.length; i++) {
-							for (let j = 0; j < _self.enemies.length; j++) {
-								const blt = _self.bullet.bullets[i];
-								const plt = _self.enemies[j];
-								const x_dis = blt.x - plt.x;
-								const y_dis = blt.y - plt.y;
-								//	如果【子单水平位置】在【敌机的左边界】和【右边界】之间，并且【垂直位置】在【敌机机头】和【机尾】之间
-								if ((x_dis >= 0 && x_dis <= _self.plain1._height) && (y_dis <= 0 && y_dis > -_self.plain1._height)) {
-									_self.bullet.bullets.splice(i, 1)
-									i--
-									_self.enemies.splice(j, 1)
-									j--
-									break;
-								}
-							}
-						}
-					}
-					guard = true
-
 				}
-				requestAnimationFrame(loop)
 			}
-		})
+			guard = true
+		}
+		requestAnimationFrame(_self.loop)
 	}
 	//  背景
 	drawBg() {
